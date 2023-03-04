@@ -1,13 +1,10 @@
 ﻿using Microsoft.Xna.Framework.Input;
 
 namespace snek {
-  internal class OneShotKeyboard {
+  class OneShotKeyboard {
     static KeyboardState currentKeyState;
     static KeyboardState previousKeyState;
-
-    public OneShotKeyboard() {
-
-    }
+    static Keys lastKeyPressed;
 
     public static KeyboardState GetState() {
       previousKeyState = currentKeyState;
@@ -15,13 +12,16 @@ namespace snek {
 
       return currentKeyState;
     }
-
-    public static bool IsPressed(Keys key) {
-      return currentKeyState.IsKeyDown(key);
+    public static void SetLastKeyPressed(Keys k) {
+      lastKeyPressed = k;
+    }   
+    
+    public static Keys GetLastKeyPressed() {
+      return lastKeyPressed;
     }
 
     public static bool HasNotBeenPressed(Keys key) {
-      return currentKeyState.IsKeyDown(key) && ! previousKeyState.IsKeyDown(key);
+      return currentKeyState.IsKeyDown(key) && !previousKeyState.IsKeyDown(key);
     }
   }
 }
