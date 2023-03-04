@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <SourceFile>C:/Users/mb_17/source/snek/Content/snakeHead.jpg</SourceFile>
-  <SourceTime>2023-03-01T23:03:50.063136+01:00</SourceTime>
+  <SourceFile>C:/Users/mb_17/source/snek/Content/snakeHead.png</SourceFile>
+  <SourceTime>2023-03-04T13:50:40.7578746+01:00</SourceTime>
   <DestFile>C:/Users/mb_17/source/snek/Content/bin/DesktopGL/Content/snakeHead.xnb</DestFile>
-  <DestTime>2023-03-02T18:25:26.7062714+01:00</DestTime>
+  <DestTime>2023-03-04T13:54:20.1898893+01:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2022-07-26T13:44:56+02:00</ImporterTime>
   <Processor>TextureProcessor</Processor>

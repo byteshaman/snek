@@ -4,8 +4,8 @@
   <Platform>DesktopGL</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/mb_17/source/snek/Content/fruit.jpg</File>
-    <File>C:/Users/mb_17/source/snek/Content/snakeHead.jpg</File>
+    <File>C:/Users/mb_17/source/snek/Content/mouse.png</File>
+    <File>C:/Users/mb_17/source/snek/Content/snakeHead.png</File>
   </SourceFiles>
   <DestFiles>
     <File xsi:nil="true" />

@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "KkM5LZnWmKGmyZG+U2WsM3nHFxyKSXpYKAvNeLDnmfMdrapQsR61eWWuvLlAH7JpASP+JmXfZz3MVCE+oYvlfg==",
+  "dgSpecHash": "p9UzjEQWswOfSzbZ73zg7uSRiZxNGPLG6M9P7IcZuiT4I8+7zis52M2yh2ZmpPyzbXGy4WaqE6678w/XcNOQZA==",
   "success": true,
   "projectFilePath": "C:\\Users\\mb_17\\source\\snek\\snek.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mb_17\\.nuget\\packages\\monogame.content.builder.task\\3.8.1.303\\monogame.content.builder.task.3.8.1.303.nupkg.sha512",
-    "C:\\Users\\mb_17\\.nuget\\packages\\monogame.framework.desktopgl\\3.8.1.303\\monogame.framework.desktopgl.3.8.1.303.nupkg.sha512"
+    "C:\\Users\\mb_17\\.nuget\\packages\\monogame.extended\\3.8.0\\monogame.extended.3.8.0.nupkg.sha512",
+    "C:\\Users\\mb_17\\.nuget\\packages\\monogame.framework.desktopgl\\3.8.1.303\\monogame.framework.desktopgl.3.8.1.303.nupkg.sha512",
+    "C:\\Users\\mb_17\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
   ],
   "logs": []
 }
