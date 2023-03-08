@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Xml.Schema;
 
 
 
@@ -11,7 +10,6 @@ namespace snek {
     #region Attributes
     readonly GraphicsDeviceManager graphics;
     SpriteBatch spriteBatch;
-    readonly int windowSize;
 
     // Mouse
     Texture2D mouseTexture;
@@ -20,7 +18,8 @@ namespace snek {
     readonly float respawnMouseTimer;
 
     // Snake
-    Texture2D snakeHeadTexture;
+    Snake snake;
+    Texture2D snakePartTexture;
     Vector2 snakeHeadPosition;
     float snakeTimer;
     readonly float snakeSpeed;
@@ -29,34 +28,33 @@ namespace snek {
     // Keyboard
     KeyboardState keyboardState;
 
-    // Map
-    readonly Map map;
-    readonly int tilesNumber;
-    readonly int tileSize;
+    // GameBoard
+    readonly GameBoard board;
 
     // Timer
     #endregion
 
     // Constructor, used to initialize the starting variables
     public Game1() {
-      windowSize = 800;
-
-      graphics = new GraphicsDeviceManager(this);
-      graphics.PreferredBackBufferWidth = graphics.PreferredBackBufferHeight = windowSize;
+      graphics = new GraphicsDeviceManager(this) {
+        PreferredBackBufferWidth = Globals.WINDOW_SIZE,
+        PreferredBackBufferHeight = Globals.WINDOW_SIZE
+      };
       graphics.ApplyChanges();
 
-      tilesNumber = 20;
-      tileSize = 40;
-      map = new(tilesNumber, tileSize);
+      board = new GameBoard();
+      snake = new Snake();
 
       keyboardState = new KeyboardState();
+
       snakeTimer = 0f;
-      snakeSpeed = 0.1f;
+      snakeSpeed = 0.5f;
+
+      respawnMouseTimer = 500f;
+      mouseTimer = 0f;
 
       Content.RootDirectory = "Content";
       IsMouseVisible = true;
-      respawnMouseTimer = 5f;
-      mouseTimer = 0f;
     }
 
     #region BaseFunctions
@@ -66,9 +64,7 @@ namespace snek {
 
       base.Initialize();
 
-      mousePosition = GetXYPosition(mouseTexture.Width, mouseTexture.Height);
-      snakeHeadPosition = new Vector2(0, 0);
-      OneShotKeyboard.SetLastKeyPressed(Keys.Right);
+      mousePosition = board.GetNextMousePosition();
     }
 
     // Called within the Initialize method, used to load game content 
@@ -76,17 +72,20 @@ namespace snek {
       spriteBatch = new SpriteBatch(GraphicsDevice);
 
       mouseTexture = Content.Load<Texture2D>("mouse");
-      snakeHeadTexture = Content.Load<Texture2D>("snakeHead");
+      snakePartTexture = Content.Load<Texture2D>("snakeHead");
     }
 
     // Called multiple times per second, draws content to the screen
     protected override void Draw(GameTime gameTime) {
       GraphicsDevice.Clear(Color.Black);
-      map.Draw(spriteBatch);
+
+      board.Draw(spriteBatch);
 
       spriteBatch.Begin();
       spriteBatch.Draw(mouseTexture, mousePosition, Color.White);
-      spriteBatch.Draw(snakeHeadTexture, snakeHeadPosition, Color.White);
+      foreach (Cell snakePart in snake.GetSnakePartList()) {
+        spriteBatch.Draw(snakePartTexture, snakePart.GetCoordinates(), Color.White);
+      }
       spriteBatch.End();
 
 
@@ -95,14 +94,13 @@ namespace snek {
 
     // Called multiple times per second, updates the game state
     protected override void Update(GameTime gameTime) {
-      if (Keyboard.GetState().IsKeyDown(Keys.Escape)) {
-        Exit();
-      }
+      
 
       // Detect collision
       if (snakeHeadPosition == mousePosition) {
-      mouseTimer = 0f;
-        mousePosition = GetXYPosition(mouseTexture.Width, mouseTexture.Height);
+        // Reset timer
+        mouseTimer = 0f;
+        mousePosition = board.GetNextMousePosition();
       }
 
       #region timer actions
@@ -111,8 +109,8 @@ namespace snek {
 
       if (mouseTimer >= respawnMouseTimer) {
         mouseTimer -= respawnMouseTimer; // reset timer
-        mousePosition = GetXYPosition(mouseTexture.Width, mouseTexture.Height); //update mouse position
-        Console.WriteLine($"mousePosition.X: {mousePosition.X}, mousePosition.Y: {mousePosition.Y}");
+        mousePosition = board.GetNextMousePosition(); //update mouse position
+        Console.WriteLine($"mouse coord: ({mousePosition.X}, {mousePosition.Y})");
       }
       #endregion
 
@@ -123,21 +121,21 @@ namespace snek {
         HandleInput();
       }
 
-      snakeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+      snakeTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
       if (snakeTimer >= snakeSpeed) {
         snakeTimer -= snakeSpeed;
-        switch (OneShotKeyboard.GetLastKeyPressed()) {
-          case Keys.Left:
-            snakeHeadPosition.X -= tileSize;
+        switch (snake.GetDirection()) {
+          case Direction.LEFT:
+            snakeHeadPosition.X -= Globals.CELL_SIZE;
             break;
-          case Keys.Right:
-            snakeHeadPosition.X += tileSize;
+          case Direction.RIGHT:
+            snakeHeadPosition.X += Globals.CELL_SIZE;
             break;
-          case Keys.Up:
-            snakeHeadPosition.Y -= tileSize;
+          case Direction.UP:
+            snakeHeadPosition.Y -= Globals.CELL_SIZE;
             break;
-          case Keys.Down:
-            snakeHeadPosition.Y += tileSize;
+          case Direction.DOWN:
+            snakeHeadPosition.Y += Globals.CELL_SIZE;
             break;
         }
       }
@@ -150,65 +148,59 @@ namespace snek {
     #endregion
 
     #region MyFunctions
-    Vector2 GetXYPosition(int width, int height) {
-      int lowerBound = 1;
-      int upperBound = tilesNumber;
-      Random random = new();
-      int rndX = random.Next(lowerBound, upperBound);
-      int rndY = random.Next(lowerBound, upperBound);
-      int posX = rndX * tileSize;
-      int posY = rndY * tileSize;
-
-      Console.WriteLine($"TileX: {rndX}, TileY: {rndY} - PosX: {posX}, PosY: {posY}");
-
-      return new Vector2(posX, posY);
-    }
-
     protected void HandleBorderCollision() {
       // Respawn right
-      if (snakeHeadPosition.X >= windowSize) {
-        snakeHeadPosition.X -= windowSize;
+      if (snakeHeadPosition.X >= Globals.WINDOW_SIZE) {
+        snakeHeadPosition.X -= Globals.WINDOW_SIZE;
       }
       // Respawn left
       if (snakeHeadPosition.X < 0) {
-        snakeHeadPosition.X += windowSize;
+        snakeHeadPosition.X += Globals.WINDOW_SIZE;
       }
       // Respawn down
-      if (snakeHeadPosition.Y >= windowSize) {
-        snakeHeadPosition.Y -= windowSize;
+      if (snakeHeadPosition.Y >= Globals.WINDOW_SIZE) {
+        snakeHeadPosition.Y -= Globals.WINDOW_SIZE;
       }
       // Respawn up
       if (snakeHeadPosition.Y < 0) {
-        snakeHeadPosition.Y += windowSize;
+        snakeHeadPosition.Y += Globals.WINDOW_SIZE;
       }
     }
 
     protected void HandleInput() {
+      // Quit game
+      if (Keyboard.GetState().IsKeyDown(Keys.Escape)) {
+        Exit();
+      }
+
       // Right
       if (keyboardState.IsKeyDown(Keys.Right)) {
-        if (OneShotKeyboard.HasNotBeenPressed(Keys.Right)) {
-          //snakeHeadPosition.X += tileSize;
+        if (snake.GetDirectionAxis() != DirectionAxis.X) {
+          snake.SetDirection(Direction.RIGHT);
           OneShotKeyboard.SetLastKeyPressed(Keys.Right);
         }
       }
       // Left
       if (keyboardState.IsKeyDown(Keys.Left)) {
-        if (OneShotKeyboard.HasNotBeenPressed(Keys.Left)) {
-          //snakeHeadPosition.X -= tileSize;
+        if (snake.GetDirectionAxis() != DirectionAxis.X) {
+          snake.SetDirection(Direction.LEFT);
           OneShotKeyboard.SetLastKeyPressed(Keys.Left);
         }
       }
       // Up
       if (keyboardState.IsKeyDown(Keys.Up)) {
-        if (OneShotKeyboard.HasNotBeenPressed(Keys.Up)) {
-          //snakeHeadPosition.Y -= tileSize;
+        //if (OneShotKeyboard.HasNotBeenPressed(Keys.Up)) {
+        //  OneShotKeyboard.SetLastKeyPressed(Keys.Up);
+        //}
+        if (snake.GetDirectionAxis() != DirectionAxis.Y) {
+          snake.SetDirection(Direction.UP);
           OneShotKeyboard.SetLastKeyPressed(Keys.Up);
         }
       }
       // Down
-      if (keyboardState.IsKeyDown(Keys.Down)) {
-        if (OneShotKeyboard.HasNotBeenPressed(Keys.Down)) {
-          //snakeHeadPosition.Y += tileSize;
+      if (snake.GetDirectionAxis() != DirectionAxis.Y) {
+        if (snake.GetDirectionAxis() != DirectionAxis.Y) { 
+          snake.SetDirection(Direction.DOWN);
           OneShotKeyboard.SetLastKeyPressed(Keys.Down);
         }
       }

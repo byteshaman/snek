@@ -12,6 +12,7 @@ namespace snek {
 
       return currentKeyState;
     }
+
     public static void SetLastKeyPressed(Keys k) {
       lastKeyPressed = k;
     }   
@@ -20,7 +21,10 @@ namespace snek {
       return lastKeyPressed;
     }
 
-    public static bool HasNotBeenPressed(Keys key) {
+    /// <summary>
+    /// Check that the currently pressed key is different from the previous one
+    /// </summary>
+    public static bool NewKeyPressed(Keys key) {
       return currentKeyState.IsKeyDown(key) && !previousKeyState.IsKeyDown(key);
     }
   }
