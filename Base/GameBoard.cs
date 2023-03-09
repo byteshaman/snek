@@ -1,24 +1,22 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
-using System.Data.Common;
-using System;
-using System.Runtime.CompilerServices;
+using snek.Helpers;
 
-namespace snek {
+namespace snek.Base {
   internal class GameBoard {
     private Cell[,] cells; //2D array
     private readonly int cellSize;
     private readonly int cellCount;
 
     public GameBoard() {
-      this.cellCount = Globals.CELL_COUNT;
-      this.cellSize = Globals.CELL_SIZE;
+      cellCount = Globals.CELL_COUNT;
+      cellSize = Globals.CELL_SIZE;
 
       cells = new Cell[cellCount, cellCount];
       for (int row = 0; row < cellCount; row++) {
         for (int col = 0; col < cellCount; col++) {
-          cells[row,col] = new Cell(row, col); //internally sets posX, posY and cellType
+          cells[row, col] = new Cell(row, col); //internally sets posX, posY and cellType
           // Debug
           // Console.WriteLine($"Created cell: [{row},{col}] at coordinates: {cells[row, col].GetCoordinates()}");
         }
@@ -32,7 +30,7 @@ namespace snek {
       // Generate a random position until an empty cell is found
       while (true) {
         (row, col) = Globals.GenerateCellArrayPosition();
-        if (cells[row,col].GetType() == CellType.EMPTY)
+        if (cells[row, col].GetType() == CellType.EMPTY)
           break;
       }
       cells[row, col].SetType(CellType.FOOD);
