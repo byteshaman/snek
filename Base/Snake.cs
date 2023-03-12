@@ -1,125 +1,126 @@
 ﻿using Microsoft.Xna.Framework;
-using MonoGame.Extended.Collections;
 using snek.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace snek.Base
-{
-    internal class Snake
-    {
+namespace snek.Base {
+  internal class Snake {
 
-        private LinkedList<Cell> snakePartList = new();
-        private float speed;
-        private Direction direction;
-        private Cell snakePart;
+    private LinkedList<Cell> snakePartList = new();
+    public Direction Direction { get; set; }
+    public float Speed { get; set; }
+    public Timer Timer { get; set; }
 
-        public Snake()
-        {
-            SetRndDirection();
+    private Cell snakePart;
 
-            // Generate snake cells
-            for (int i = 0; i < Globals.INITIAL_SNAKE_SIZE; i++)
-            {
-                IncreaseSize();
-            }
+    public Snake() {
+      Speed = 1f;
+      Timer = new Timer(0.1f/Speed);
+      Direction = GetRndDirection();
 
-            speed = Globals.INITIAL_SNAKE_SPEED;
-        }
+      // Debug
+      Console.WriteLine($"Initial snake direction: {Direction}");
 
-        // Size
-        public void IncreaseSize()
-        {
-            Console.WriteLine($"Inside IncreaseSize(), size: {GetSize()}");
-            int row; int col;
-            if (GetSize() == 0)
-            {
-                (row, col) = Globals.GenerateCellArrayPosition(true); // Generate a new cell in a more closed range
-            }
-            else
-            {
-                (row, col) = snakePartList.Last.Value.GetPosition();
-                switch (direction)
-                {
-                    case Direction.Left:
-                        col++;
-                        break;
-                    case Direction.Right:
-                        col--;
-                        break;
-                    case Direction.Up:
-                        row++;
-                        break;
-                    case Direction.Down:
-                        row--;
-                        break;
-                }
-            }
-            snakePart = new Cell(row, col, CellType.SNAKE_NODE);
-            // Debug
-            Console.WriteLine($"Added snake {(GetSize() == 0 ? "head" : "part")} at: {snakePart.GetCoordinates()}");
+      // Generate snake cells
+      for (int i = 0; i < Globals.INITIAL_SNAKE_SIZE; i++) {
+        IncreaseSize();
+      }
+    }    
+    
+    public Snake(int row, int col) {
+      Speed = 1f;
+      Timer = new Timer(0.1f/Speed);
+      Direction = Direction.Up;
 
-            snakePartList.AddLast(snakePart);
-        }
+      // Debug
+      Console.WriteLine($"Initial snake direction: {Direction}");
 
-        public void DecreaseSize() { snakePartList.RemoveLast(); }
-        public int GetSize() { return snakePartList.Count; }
-
-        // Speed
-        public void SetSpeed(float speed)
-        {
-            this.speed = speed;
-        }
-        public float GetSpeed()
-        {
-            return speed;
-        }
-
-        // Direction
-        public Direction GetDirection() { return direction; }
-        public DirectionAxis GetDirectionAxis()
-        {
-            return direction == Direction.Left || direction == Direction.Right ? DirectionAxis.X : DirectionAxis.Y;
-        }
-        public void SetDirection(Direction direction)
-        {
-            this.direction = direction;
-        }
-
-        /// <summary>
-        /// Set a random direction when game starts
-        /// </summary>
-        public void SetRndDirection()
-        {
-            Array directions = Enum.GetValues(typeof(Direction));
-            Random random = new();
-            int index = random.Next(directions.Length);
-            Direction direction = (Direction)directions.GetValue(index);
-
-            // Debug
-            Console.WriteLine($"Random direction generated: {direction}");
-            this.direction = direction;
-        }
-
-        // Movement
-        public void Move(Cell nextCell)
-        {
-            // Remove tail
-            Cell tail = snakePartList.Last.Value;
-            snakePartList.RemoveLast();
-            tail.SetType(CellType.EMPTY);
-
-            // Move snakePart
-            snakePart = nextCell;
-            snakePart.SetType(CellType.SNAKE_NODE);
-            snakePartList.AddFirst(snakePart);
-        }
-
-        // Others
-        public LinkedList<Cell> GetSnakePartList() { return snakePartList; }
-        public Cell GetHead()
-        {
-            return snakePartList.First.Value;
-        }
+      // Generate snake cells
+      snakePartList.AddLast(new Cell(row, col, CellType.SNAKE_NODE));
+      switch (Direction) {
+        case Direction.Left:
+          row++;
+          break;
+        case Direction.Right:
+          row--;
+          break;
+        case Direction.Up:
+          col++;
+          break;
+        case Direction.Down:
+          col--;
+          break;
+      }
+      snakePartList.AddLast(new Cell(row, col, CellType.SNAKE_NODE));
     }
+
+    // Size
+    public void IncreaseSize() {
+      Point p;
+      if (GetSize() == 0) {
+        p = Globals.GenerateRndCellPosition(true); // Generate a new cell in a more closed range
+      } else {
+        p = snakePartList.Last.Value.Position;
+        switch (Direction) {
+          case Direction.Left:
+            p.X++;
+            break;
+          case Direction.Right:
+            p.X--;
+            break;
+          case Direction.Up:
+            p.Y--;
+            break;
+          case Direction.Down:
+            p.Y++;
+            break;
+        }
+      }
+      snakePart = new Cell(p.X, p.Y, CellType.SNAKE_NODE);
+      snakePartList.AddLast(snakePart);
+      Console.WriteLine($"IncreaseSize(), cell n.{GetSize()} added at {snakePart.Position}");
+    }
+
+    public void DecreaseSize() { snakePartList.RemoveLast(); }
+    public int GetSize() { return snakePartList.Count; }
+
+
+    // Direction
+    public DirectionAxis GetDirectionAxis() {
+
+      return Direction == Direction.Left || Direction == Direction.Right ? DirectionAxis.X : DirectionAxis.Y;
+    }
+
+    /// <summary>
+    /// Set a random direction when game starts
+    /// </summary>
+    public Direction GetRndDirection() {
+      Direction[] directions = Enum.GetValues(typeof(Direction)).Cast<Direction>()
+                                    .Where(d => d != Direction.None)
+                                    .ToArray(); //todo: filter out None
+      Random random = new();
+      int index = random.Next(directions.Length);
+      return (Direction)directions.GetValue(index);
+    }
+
+    // Movement
+    public void Move(Cell nextCell) {
+      // Remove tail
+      Cell tail = snakePartList.Last.Value;
+      snakePartList.RemoveLast();
+      tail.Type = CellType.EMPTY;
+
+      // Move snakePart
+      snakePart = nextCell;
+      snakePart.Type = CellType.SNAKE_NODE;
+      snakePartList.AddFirst(snakePart);
+    }
+
+    // Others
+    public LinkedList<Cell> GetSnakePartList() { return snakePartList; }
+    public Cell GetHead() {
+      return snakePartList.First.Value;
+    }
+  }
 }

@@ -2,39 +2,59 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using snek.Helpers;
+using System;
 
 namespace snek.Base {
-  internal class GameBoard {
+  internal class Board {
     private Cell[,] cells; //2D array
     private readonly int cellSize;
     private readonly int cellCount;
 
-    public GameBoard() {
+    public Board() {
       cellCount = Globals.CELL_COUNT;
       cellSize = Globals.CELL_SIZE;
-
+      // 2D Cell array
       cells = new Cell[cellCount, cellCount];
       for (int row = 0; row < cellCount; row++) {
         for (int col = 0; col < cellCount; col++) {
-          cells[row, col] = new Cell(row, col); //internally sets posX, posY and cellType
+          cells[row, col] = new Cell(row, col); //set Position, Coordinates and Type = EMPTY
           // Debug
-          // Console.WriteLine($"Created cell: [{row},{col}] at coordinates: {cells[row, col].GetCoordinates()}");
+          //Console.WriteLine($"Created cell: [{row},{col}] at coordinates: {cells[row, col].Coordinates}");
         }
       }
     }
 
-    public Cell[,] GetCells() { return cells; }
+    public Cell[,] GetCells() {
+      return cells;
+    }
 
-    public Vector2 GetNextMousePosition() {
-      int row, col;
+    /// <summary>
+    /// Get the cell at the specified position
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public Cell GetCellAtPos(Point pos) {
+      return cells[pos.X,pos.Y];
+    }
+
+    /// <summary>
+    /// Mark the cell at the specified position as EMPTY
+    /// </summary>
+    /// <param name="pos"></param>
+    public void EmptyCellAtPos(Point pos) {
+      cells[pos.X, pos.Y].Type = CellType.EMPTY;
+    }
+
+    public Cell GetEmptyCell() {
+      Point p;
       // Generate a random position until an empty cell is found
       while (true) {
-        (row, col) = Globals.GenerateCellArrayPosition();
-        if (cells[row, col].GetType() == CellType.EMPTY)
-          break;
+        p = Globals.GenerateRndCellPosition();
+        if (cells[p.X, p.Y].Type == CellType.EMPTY) {
+          Console.WriteLine($"Empty cell found at [{p.X},{p.Y}]");
+          return cells[p.X, p.Y];
+        }
       }
-      cells[row, col].SetType(CellType.FOOD);
-      return cells[row, col].GetCoordinates();
     }
 
     public void Draw(SpriteBatch spriteBatch) {

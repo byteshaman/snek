@@ -4,8 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using snek.Base;
 using snek.Helpers;
 using System;
-
-
+using Food = snek.Base.Food;
 
 namespace snek
 {
@@ -14,24 +13,15 @@ namespace snek
     readonly GraphicsDeviceManager graphics;
     SpriteBatch spriteBatch;
 
-    // Mouse
-    Texture2D mouseTexture;
-    Vector2 mousePosition;
-
-    // Snake
+    readonly Board board;
+    Food food;
     Snake snake;
     Texture2D snakePartTexture;
-    readonly float snakeSpeed;
-    float snakeTimer;
 
     // Keyboard
     KeyboardState keyboardState;
 
     // GameBoard
-    readonly GameBoard board;
-
-    // Timer
-    Timer mouseRespawnTimer;
     #endregion
 
     // Constructor, used to initialize the starting variables
@@ -42,16 +32,11 @@ namespace snek
       };
       graphics.ApplyChanges();
 
-      board = new GameBoard();
+      board = new Board();
+      food = new Food(); // set Type = FOOD
       snake = new Snake();
 
       keyboardState = new KeyboardState();
-
-      snakeTimer = 0f;
-      snakeSpeed = 0.1f;
-
-      // Timers
-      mouseRespawnTimer = new Timer(Globals.INITIAL_MOUSE_TIMER);
 
       Content.RootDirectory = "Content";
       IsMouseVisible = true;
@@ -64,14 +49,14 @@ namespace snek
 
       base.Initialize();
 
-      mousePosition = board.GetNextMousePosition();
+      GenerateFood();
     }
 
     // Called within the Initialize method, used to load game content 
     protected override void LoadContent() {
       spriteBatch = new SpriteBatch(GraphicsDevice);
 
-      mouseTexture = Content.Load<Texture2D>("mouse");
+      food.LoadContent(Content);
       snakePartTexture = Content.Load<Texture2D>("snakeHead");
     }
 
@@ -80,11 +65,11 @@ namespace snek
       GraphicsDevice.Clear(Color.Black);
 
       board.Draw(spriteBatch);
+      food.Draw(spriteBatch);
 
       spriteBatch.Begin();
-      spriteBatch.Draw(mouseTexture, mousePosition, Color.White);
       foreach (Cell snakePart in snake.GetSnakePartList()) {
-        spriteBatch.Draw(snakePartTexture, snakePart.GetCoordinates(), Color.White);
+        spriteBatch.Draw(snakePartTexture, snakePart.Coordinates, Color.White);
       }
       spriteBatch.End();
 
@@ -93,117 +78,119 @@ namespace snek
     }
 
     // Called multiple times per second, updates the game state
-    protected override void Update(GameTime gameTime) {
-      
-
-      //// Detect collision
-      //if (snake.GetHeadCoordinates() == mousePosition) {
-      //  // Reset timer
-      //  mouseTimer = 0f;
-      //  mousePosition = board.GetNextMousePosition();
-      //}
-
-      #region timer actions
-      mouseRespawnTimer.Update(gameTime);
-      if (mouseRespawnTimer.NeedsReset()) {
-        mouseRespawnTimer.Reset();
-        mousePosition = board.GetNextMousePosition(); //update mouse position
-        Console.WriteLine($"mouse coord: ({mousePosition})");
+    protected override void Update(GameTime gameTime) { 
+      food.Timer.Update(gameTime);
+      if (food.Timer.NeedsReset()) {
+        GenerateFood();
+        food.Timer.Reset();
       }
-      #endregion
 
-      #region keyboard
+      snake.Timer.Update(gameTime);
+      if (snake.Timer.NeedsReset()) {
+        snake.Timer.Reset();
+        MoveSnake();
+      }
+
+
       keyboardState = OneShotKbd.GetState();
-
       if (this.keyboardState.GetPressedKeyCount() > 0) {
         HandleInput();
       }
 
-      snakeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-      if (snakeTimer >= snakeSpeed) {
-        snakeTimer -= snakeSpeed;
-        Cell nextCell = GetNextCell(snake.GetHead());
-        if (nextCell.GetType() == CellType.FOOD) {
-
-          Console.WriteLine($"Collided with {nextCell.GetType()}, increase size and move mouse");
-          snake.IncreaseSize();
-          mousePosition = board.GetNextMousePosition();
-        } else if (nextCell.GetType() == CellType.SNAKE_NODE || nextCell.GetType() == CellType.POISON) {
-          Console.WriteLine($"Collided with {nextCell.GetType()}, game over :(");
-          // Set direction to none to stop moving?
-        }
-        snake.Move(nextCell);
-      }
-
-
-      #endregion
       base.Update(gameTime);
     }
     #endregion
 
     #region MyFunctions
+    public void GenerateFood() {
+      Cell emptyCell = board.GetEmptyCell();
+
+      board.EmptyCellAtPos(food.Position);
+      food.Position = emptyCell.Position;
+      food.Coordinates = emptyCell.Coordinates;
+      emptyCell.Type = CellType.FOOD;
+    }
+
     private Cell GetNextCell(Cell snakeHead) {
-      (int row, int col) = snakeHead.GetPosition();
+      Point pos = snakeHead.Position;
 
       // Change position based on direction, respawn snake at proper position
-      switch (snake.GetDirection()) {
+      switch (snake.Direction) {
         case Direction.Left:
-          col--;
-          if (col < 0) {
-            col = Globals.GetMaxMapCellValue();
+          pos.X--;
+          if (pos.X < 0) {
+            pos.X = Globals.GetMaxMapCellValue();
           }
           break;
         case Direction.Right:
-          col++;
-          if (col > Globals.GetMaxMapCellValue()) {
-            col = 0;
+          pos.X++;
+          if (pos.X > Globals.GetMaxMapCellValue()) {
+            pos.X = 0;
           }
           break;
         case Direction.Up:
-          row--;
-          if (row < 0) {
-            row = Globals.GetMaxMapCellValue();
+          pos.Y--;
+          if (pos.Y < 0) {
+            pos.Y = Globals.GetMaxMapCellValue();
           }
           break;
         case Direction.Down:
-          row++;
-          if (row > Globals.GetMaxMapCellValue()) {
-            row = 0;
+          pos.Y++;
+          if (pos.Y > Globals.GetMaxMapCellValue()) {
+            pos.Y = 0;
           }
           break;
       }
 
       // Access the next cell
-      Cell nextCell = board.GetCells()[row,col];
+      Cell nextCell = board.GetCellAtPos(pos);
       return nextCell;
     }
-
-    protected void HandleInput() {
+ 
+    private void HandleInput() {
       // Quit game
       if (Keyboard.GetState().IsKeyDown(Keys.Escape)) {
         Exit();
       }
 
+      Console.WriteLine($"Current snake direction {snake.Direction}");
+
       if (snake.GetDirectionAxis() == DirectionAxis.X) {
         // Up
         if (keyboardState.IsKeyDown(Keys.Up) && OneShotKbd.IsNewKeyPress(Keys.Up)) {
-          snake.SetDirection(Direction.Up);
+          snake.Direction = Direction.Up;
         }
         // Down
         if (keyboardState.IsKeyDown(Keys.Down) && OneShotKbd.IsNewKeyPress(Keys.Down)) {
-          snake.SetDirection(Direction.Down);
+          snake.Direction = Direction.Down;
         }
       } else {
         // Right
         if (keyboardState.IsKeyDown(Keys.Right) && OneShotKbd.IsNewKeyPress(Keys.Right)) {
-          snake.SetDirection(Direction.Right);
+          snake.Direction = Direction.Right;
         }
         // Left
         if (keyboardState.IsKeyDown(Keys.Left) && OneShotKbd.IsNewKeyPress(Keys.Left)) {
-          snake.SetDirection(Direction.Left);
+          snake.Direction = Direction.Left;
         }
       }
     }
+
+    private void MoveSnake() {
+      Cell nextCell = GetNextCell(snake.GetHead());
+      if (nextCell.Type == CellType.FOOD) {
+        Console.WriteLine($"Collided with {nextCell.Type}, increase score, size and re-generate food");
+        nextCell.Type = CellType.EMPTY;
+        food.Timer.Reset();
+        GenerateFood();
+        snake.IncreaseSize();
+      } else if (nextCell.Type == CellType.SNAKE_NODE || nextCell.Type == CellType.POISON) {
+        Console.WriteLine($"Collided with {nextCell.GetType()}, game over :(");
+        // Set direction to none to stop moving?
+      }
+      snake.Move(nextCell);
+    }
+
     #endregion
   }
 }

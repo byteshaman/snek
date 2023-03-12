@@ -17,7 +17,7 @@ namespace snek.Helpers {
     }
 
     public void DecreaseTimerBy(float decreaseUnit) {
-      // I might be at 1.2 and decrease by 0.3 and the timerLowerBound is 1: the operation is possible since CanBeDecreased() will return true: 
+      // I might be at 1.2 and decrease by 0.3 and the timerLowerBound is 1: the operation is possible since CanBeDecreased() will return true: reset timer to timerLowerBound
       if (timer - decreaseUnit < timerLowerBound) {
         timer = timerLowerBound;
       } else {

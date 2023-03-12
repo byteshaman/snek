@@ -1,36 +1,36 @@
-﻿using Microsoft.VisualBasic;
-using Microsoft.Xna.Framework;
-using MonoGame.Extended;
+﻿using Microsoft.Xna.Framework;
 using snek.Helpers;
+using G = snek.Helpers.Globals;
 
 namespace snek.Base {
   internal class Cell {
     // Position in the array
-    private readonly int row;
-    private readonly int col;
+    public Point Position { get; set; }
 
     // XY Coordinates
-    private readonly int X;
-    private readonly int Y;
-    // Type (EMPTY, FOOD, POISON, SNAKE_NODE)
-    private CellType cellType;
+    public Vector2 Coordinates { get; set; }
 
-    public Cell(int row, int col, CellType cellType = CellType.EMPTY) {
-      this.row = row;
-      Y = row * Globals.CELL_SIZE;
-      this.col = col;
-      X = col * Globals.CELL_SIZE;
-      // When the cell is created, its default type is empty
-      if (cellType != CellType.EMPTY) {
-        this.cellType = cellType;
-      }
+    // Type (EMPTY, FOOD, POISON, SNAKE_NODE)
+    public CellType Type {get; set; }
+
+    public void SetPosAndCoord (Point p) {
+      Position = p;
+      Coordinates = new Vector2(p.X, p.Y) * G.CELL_SIZE;
     }
 
-    public Vector2 GetCoordinates() { return new Vector2(X, Y); }
-    public (int, int) GetPosition() { return (row, col); }
-    new public CellType GetType() { return cellType; }
-    public void SetType(CellType cellType) { this.cellType = cellType; }
-    public int GetRow() { return row; }
-    public int GetCol() { return col; }
+    public Cell() {
+      Coordinates = Vector2.Zero;
+      Type = CellType.EMPTY;
+      Position = Point.Zero;
+    }
+
+    public Cell(int row, int col, CellType type = CellType.EMPTY) {
+      Position = new Point(row, col);
+      Coordinates = new Vector2(row, col)*G.CELL_SIZE;
+      // Set specific type when provided
+      if (type != CellType.EMPTY) {
+        Type = type;
+      }
+    }
   }
 }
