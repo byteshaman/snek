@@ -4,21 +4,12 @@ namespace snek.Helpers {
   class OneShotKbd {
     static KeyboardState currentKeyState;
     static KeyboardState previousKeyState;
-    static Keys lastKeyPressed;
 
     public static KeyboardState GetState() {
       previousKeyState = currentKeyState;
       currentKeyState = Keyboard.GetState();
 
       return currentKeyState;
-    }
-
-    public static void SetLastKeyPressed(Keys k) {
-      lastKeyPressed = k;
-    }
-
-    public static Keys GetLastKeyPressed() {
-      return lastKeyPressed;
     }
 
     /// <summary>

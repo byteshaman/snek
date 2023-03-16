@@ -3,7 +3,7 @@ using snek.Helpers;
 using G = snek.Helpers.Globals;
 
 namespace snek.Base {
-  internal class Cell {
+  public class Cell {
     // Position in the array
     public Point Position { get; set; }
 

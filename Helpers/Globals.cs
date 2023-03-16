@@ -2,14 +2,14 @@
 using System;
 
 namespace snek.Helpers {
-  enum CellType {
+  public enum CellType {
     EMPTY,
     FOOD,
     POISON,
-    SNAKE_NODE
+    SNAKE
   }
 
-  enum Direction {
+  public enum Direction {
     Down,
     Left,
     Right,
@@ -17,19 +17,46 @@ namespace snek.Helpers {
     None
   }
 
-  enum DirectionAxis {
+  public enum DirectionAxis {
     X,
     Y
   }
+
+  public enum MenuType {
+    GameStart,
+    GamePause,
+    GameOver
+  }
+
+  public enum Difficulty {
+    One = 1,
+    Two,
+    Three,
+    Four,
+    Five
+  }
+
+
 
   public static class Globals {
     public const int CELL_SIZE = 40;
     public const int CELL_COUNT = 21;
     public const int WINDOW_SIZE = CELL_SIZE * CELL_COUNT;
-    public const int INITIAL_SNAKE_SIZE = 2;
-    public const float INITIAL_MOUSE_TIMER = 5f;
-    public const float REDUCE_SNAKE_TIMER = 4.5f;
+    public const int INITIAL_SNAKE_SIZE = 4;
+    public const float MOUSE_RESPAWN_TIMER = 5f;
+    public const float SNAKE_SHRINK_TIMER = MOUSE_RESPAWN_TIMER - 0.5f;
     public const float SCORE_TIMER = 1f;
+
+    // My Colors
+    public readonly static Color BUTTON_HOVER_COLOR = new(0, 69, 0);
+    public readonly static Color CELL_BORDER_COLOR = Color.DarkGray;
+    public readonly static Color CELL_COLOR = Color.Black;
+    public readonly static Color FONT_COLOR = new(110, 246, 5);
+    public readonly static Color BUTTON_BORDER_COLOR = FONT_COLOR;
+    public readonly static Color MENU_BG_COLOR = Color.Black;
+    public readonly static Color BUTTON_COLOR = MENU_BG_COLOR;
+    public readonly static Color GAME_BG_COLOR = Color.Black;
+
 
 
     public static int GetMaxMapCellValue() {

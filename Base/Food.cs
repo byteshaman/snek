@@ -9,7 +9,7 @@ namespace snek.Base {
     Texture2D Texture { get; set; }
 
     public Food() {
-      Timer = new Timer(Globals.INITIAL_MOUSE_TIMER);
+      Timer = new Timer(Globals.MOUSE_RESPAWN_TIMER);
     }
 
     public void Draw(SpriteBatch spriteBatch) {
@@ -18,7 +18,7 @@ namespace snek.Base {
       spriteBatch.End();
     }
     public void LoadContent(ContentManager Content) {
-      Texture = Content.Load<Texture2D>("mouse");
+      Texture = Content.Load<Texture2D>("Sprites/food");
     }
   }
 }

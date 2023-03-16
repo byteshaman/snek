@@ -25,9 +25,7 @@ namespace snek.Helpers {
       }
     }
 
-    public bool NeedsReset() {
-      return timeElapsed >= timer;
-    }
+    public bool NeedsReset() { return timeElapsed >= timer; }
 
     public void Reset() {
       timeElapsed -= timer; //would timeElapsed = 0 work as well?

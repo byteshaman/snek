@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using snek.Helpers;
 using System;
 using System.Collections.Generic;
@@ -10,13 +12,35 @@ namespace snek.Base {
     private LinkedList<Cell> snakePartList = new();
     public Direction Direction { get; set; }
     public float Speed { get; set; }
-    public Timer Timer { get; set; }
+    public Timer MovementTimer { get; set; }
+    public Timer ShrinkTimer { get; set; }
 
     private Cell snakePart;
+    Texture2D HeadTexture { get; set; }
+    Texture2D BodyTexture { get; set; }
+    
+
+    public void Draw(SpriteBatch spriteBatch) {
+      Texture2D snakePartTexture = HeadTexture;
+      spriteBatch.Begin();
+      foreach (Cell snakePart in snakePartList) {
+        if (snakePart != GetHead()) {
+          snakePartTexture = BodyTexture;
+        }
+        spriteBatch.Draw(snakePartTexture, snakePart.Coordinates, Color.White);
+      }
+      spriteBatch.End();
+    }
+    public void LoadContent(ContentManager Content) {
+      HeadTexture = Content.Load<Texture2D>("Sprites/snakeHead");
+      BodyTexture = Content.Load<Texture2D>("Sprites/snakeBody");
+    }
+
 
     public Snake() {
       Speed = 1f;
-      Timer = new Timer(0.1f/Speed);
+      MovementTimer = new Timer(0.1f/Speed);
+      ShrinkTimer = new Timer(Globals.SNAKE_SHRINK_TIMER);
       Direction = GetRndDirection();
 
       // Debug
@@ -27,33 +51,6 @@ namespace snek.Base {
         IncreaseSize();
       }
     }    
-    
-    public Snake(int row, int col) {
-      Speed = 1f;
-      Timer = new Timer(0.1f/Speed);
-      Direction = Direction.Up;
-
-      // Debug
-      Console.WriteLine($"Initial snake direction: {Direction}");
-
-      // Generate snake cells
-      snakePartList.AddLast(new Cell(row, col, CellType.SNAKE_NODE));
-      switch (Direction) {
-        case Direction.Left:
-          row++;
-          break;
-        case Direction.Right:
-          row--;
-          break;
-        case Direction.Up:
-          col++;
-          break;
-        case Direction.Down:
-          col--;
-          break;
-      }
-      snakePartList.AddLast(new Cell(row, col, CellType.SNAKE_NODE));
-    }
 
     // Size
     public void IncreaseSize() {
@@ -77,12 +74,14 @@ namespace snek.Base {
             break;
         }
       }
-      snakePart = new Cell(p.X, p.Y, CellType.SNAKE_NODE);
+      snakePart = new Cell(p.X, p.Y, CellType.SNAKE);
       snakePartList.AddLast(snakePart);
       Console.WriteLine($"IncreaseSize(), cell n.{GetSize()} added at {snakePart.Position}");
     }
-
-    public void DecreaseSize() { snakePartList.RemoveLast(); }
+    public void DecreaseSize() {
+      snakePartList.Last.Value.Type = CellType.EMPTY;
+      snakePartList.RemoveLast(); 
+    }
     public int GetSize() { return snakePartList.Count; }
 
 
@@ -96,9 +95,10 @@ namespace snek.Base {
     /// Set a random direction when game starts
     /// </summary>
     public Direction GetRndDirection() {
-      Direction[] directions = Enum.GetValues(typeof(Direction)).Cast<Direction>()
-                                    .Where(d => d != Direction.None)
-                                    .ToArray(); //todo: filter out None
+      Direction[] directions = Enum.GetValues(typeof(Direction))
+                                   .Cast<Direction>()
+                                   .Where(d => d != Direction.None)
+                                   .ToArray();
       Random random = new();
       int index = random.Next(directions.Length);
       return (Direction)directions.GetValue(index);
@@ -113,14 +113,12 @@ namespace snek.Base {
 
       // Move snakePart
       snakePart = nextCell;
-      snakePart.Type = CellType.SNAKE_NODE;
+      snakePart.Type = CellType.SNAKE;
       snakePartList.AddFirst(snakePart);
     }
 
     // Others
     public LinkedList<Cell> GetSnakePartList() { return snakePartList; }
-    public Cell GetHead() {
-      return snakePartList.First.Value;
-    }
+    public Cell GetHead() { return snakePartList.First.Value; }
   }
 }

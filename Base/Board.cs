@@ -64,9 +64,9 @@ namespace snek.Base {
       for (int row = 0; row < cellCount; row++) {
         for (int column = 0; column < cellCount; column++) {
           // Draw first rectangle
-          spriteBatch.FillRectangle(tilePosition, new Size2(cellSize, cellSize), Color.DarkGray);
+          spriteBatch.FillRectangle(tilePosition, new Size2(cellSize, cellSize), Globals.CELL_BORDER_COLOR);
           // Draw second rectangle to give the border effect
-          spriteBatch.FillRectangle(tilePosition + new Vector2(1, 1), new Size2(cellSize - 2, cellSize - 2), Color.Black);
+          spriteBatch.FillRectangle(tilePosition + new Vector2(1, 1), new Size2(cellSize - 2, cellSize - 2), Globals.CELL_COLOR);
           // Draw column
           tilePosition.Y += cellSize;
         }
