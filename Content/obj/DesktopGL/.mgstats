@@ -1,5 +1,2 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Users/mb_17/source/snek/Content/Fonts/Font.spritefont","C:/Users/mb_17/source/snek/Content/bin/DesktopGL/Fonts/Font.xnb","FontDescriptionProcessor","SpriteFontContent",2073,267295,0,1658734
-"C:/Users/mb_17/source/snek/Content/Sprites/food.png","C:/Users/mb_17/source/snek/Content/bin/DesktopGL/Sprites/food.xnb","TextureProcessor","Texture2DContent",1862,6485,0,0150918
-"C:/Users/mb_17/source/snek/Content/Sprites/snakeBody.png","C:/Users/mb_17/source/snek/Content/bin/DesktopGL/Sprites/snakeBody.xnb","TextureProcessor","Texture2DContent",162,6485,0,0007989
-"C:/Users/mb_17/source/snek/Content/Sprites/snakeHead.png","C:/Users/mb_17/source/snek/Content/bin/DesktopGL/Sprites/snakeHead.xnb","TextureProcessor","Texture2DContent",183,6485,0,0008215
+"C:/Users/mb_17/source/snek/Content/Sprites/mouseCursor.png","C:/Users/mb_17/source/snek/Content/bin/DesktopGL/Sprites/mouseCursor.xnb","TextureProcessor","Texture2DContent",18665,7285,0,0753377

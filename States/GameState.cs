@@ -4,12 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using snek.Base;
 using snek.Helpers;
+using G = snek.Helpers.Globals;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace snek.States {
   public class GameState : State {
@@ -19,27 +15,37 @@ namespace snek.States {
     readonly Snake snake;
     KeyboardState keyboardState;
 
+    Timer scoreTimer;
     #endregion
 
-    public GameState(Game1 game, GraphicsDevice graphicsDevice, ContentManager contentManager) : base(game, graphicsDevice, contentManager) {
-      //this.graphicsDevice = graphicsDevice;
-      //this.contentManager = contentManager;
+    #region Properties
+    public int Score { get; set; }
+    #endregion
 
+    #region Methods
+    public GameState(Game1 game, GraphicsDevice graphicsDevice, ContentManager contentManager) : base(game, graphicsDevice, contentManager) {
       board = new Board();
       food = new Food(); // set Type = FOOD
       snake = new Snake();
       keyboardState = new KeyboardState();
 
-      GenerateFood();
+      //Score
+      scoreTimer = new(1);
+      Score = 0;
 
+
+      // Disable cursor
+      game.IsMouseVisible = false;
+
+      // Inizialize functions
       food.LoadContent(contentManager);
       snake.LoadContent(contentManager);
+      GenerateFood();
     }
 
-    #region BaseFunctions
     // Called multiple times per second, draws content to the screen
     public override void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
-      game.GraphicsDevice.Clear(Globals.GAME_BG_COLOR);
+      game.GraphicsDevice.Clear(G.GAME_BG_COLOR);
 
       board.Draw(spriteBatch);
       food.Draw(spriteBatch);
@@ -48,40 +54,49 @@ namespace snek.States {
 
     // Called multiple times per second, updates the game state
     public override void Update(GameTime gameTime) {
+      // Food management
       food.Timer.Update(gameTime);
       if (food.Timer.NeedsReset()) {
         GenerateFood();
         food.Timer.Reset();
+        // Reduce score for not eating food in time
+        //UpdateScore(G.FOOD_TIMER_MALUS);
       }
 
-      snake.ShrinkTimer.Update(gameTime);
-      if (snake.ShrinkTimer.NeedsReset()) {
-        snake.ShrinkTimer.Reset();
-        snake.DecreaseSize();
-      }
-
+      // Snake movement and shrink management
       snake.MovementTimer.Update(gameTime);
       if (snake.MovementTimer.NeedsReset()) {
         snake.MovementTimer.Reset();
         MoveSnake();
       }
 
+      snake.ShrinkTimer.Update(gameTime);
+      if (snake.ShrinkTimer.NeedsReset()) {
+        snake.DecreaseSize();
+        snake.ShrinkTimer.Reset();
+      }
 
+      // Score management
+      //scoreTimer.Update(gameTime);
+      //if (scoreTimer.NeedsReset()) {
+      //  scoreTimer.Reset();
+      //  Score++;
+      //}
+
+      // KBD management
       keyboardState = OneShotKbd.GetState();
       if (this.keyboardState.GetPressedKeyCount() > 0) {
         HandleInput();
       }
     }
-    #endregion
 
-    #region MyFunctions
     public void GenerateFood() {
       Cell emptyCell = board.GetEmptyCell();
 
-      board.EmptyCellAtPos(food.Position);
+      board.EmptyCellAtPos(food.Position); //set current food position as empty
       food.Position = emptyCell.Position;
       food.Coordinates = emptyCell.Coordinates;
-      emptyCell.Type = CellType.FOOD;
+      emptyCell.Type = CellType.FOOD;//set new food position as food
     }
 
     private Cell GetNextCell(Cell snakeHead) {
@@ -92,24 +107,24 @@ namespace snek.States {
         case Direction.Left:
           pos.X--;
           if (pos.X < 0) {
-            pos.X = Globals.GetMaxMapCellValue();
+            pos.X = G.GetMaxMapCellValue();
           }
           break;
         case Direction.Right:
           pos.X++;
-          if (pos.X > Globals.GetMaxMapCellValue()) {
+          if (pos.X > G.GetMaxMapCellValue()) {
             pos.X = 0;
           }
           break;
         case Direction.Up:
           pos.Y--;
           if (pos.Y < 0) {
-            pos.Y = Globals.GetMaxMapCellValue();
+            pos.Y = G.GetMaxMapCellValue();
           }
           break;
         case Direction.Down:
           pos.Y++;
-          if (pos.Y > Globals.GetMaxMapCellValue()) {
+          if (pos.Y > G.GetMaxMapCellValue()) {
             pos.Y = 0;
           }
           break;
@@ -126,7 +141,8 @@ namespace snek.States {
         game.Exit();
       }
 
-      Console.WriteLine($"Current snake direction {snake.Direction}");
+      // Debug
+      //Console.WriteLine($"Current snake direction {snake.Direction}");
 
       if (snake.GetDirectionAxis() == DirectionAxis.X) {
         // Up
@@ -149,11 +165,26 @@ namespace snek.States {
       }
     }
 
+
+    private void HandleDifficulty() {
+      foreach (DifficultyLevel level in G.DifficultyLevels) {
+        if (Score >= level.scoreThreshold) {
+          Console.WriteLine($"level.scoreThreshold {level.scoreThreshold}");
+
+          snake.MovementTimer.TimerProp = level.snakeSpeed;
+          snake.ShrinkTimer.TimerProp = level.snakeShrink;
+          food.Timer.TimerProp = level.foodTimer;
+        }
+      }
+    }
+
     private void MoveSnake() {
       Cell nextCell = GetNextCell(snake.GetHead());
       if (nextCell.Type == CellType.FOOD) {
-        Console.WriteLine($"Collided with {nextCell.Type}, increase score, size and re-generate food");
+        Console.WriteLine($"Collided with {nextCell.Type}, score: {Score}, size: {snake.GetSize()}");
         nextCell.Type = CellType.EMPTY;
+        UpdateScore(G.FOOD_BONUS);
+
         food.Timer.Reset();
         GenerateFood();
         snake.IncreaseSize();
@@ -163,6 +194,11 @@ namespace snek.States {
         // Set direction to none to stop moving?
       }
       snake.Move(nextCell);
+    }
+
+    private void UpdateScore (sbyte amount) {
+      Score += amount;
+      HandleDifficulty();
     }
 
     #endregion

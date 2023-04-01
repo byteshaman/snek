@@ -11,7 +11,6 @@ namespace snek.Base {
 
     private LinkedList<Cell> snakePartList = new();
     public Direction Direction { get; set; }
-    public float Speed { get; set; }
     public Timer MovementTimer { get; set; }
     public Timer ShrinkTimer { get; set; }
 
@@ -38,8 +37,7 @@ namespace snek.Base {
 
 
     public Snake() {
-      Speed = 1f;
-      MovementTimer = new Timer(0.1f/Speed);
+      MovementTimer = new Timer(0.1f);
       ShrinkTimer = new Timer(Globals.SNAKE_SHRINK_TIMER);
       Direction = GetRndDirection();
 
@@ -67,10 +65,10 @@ namespace snek.Base {
             p.X--;
             break;
           case Direction.Up:
-            p.Y--;
+            p.Y++;
             break;
           case Direction.Down:
-            p.Y++;
+            p.Y--;
             break;
         }
       }
@@ -87,7 +85,6 @@ namespace snek.Base {
 
     // Direction
     public DirectionAxis GetDirectionAxis() {
-
       return Direction == Direction.Left || Direction == Direction.Right ? DirectionAxis.X : DirectionAxis.Y;
     }
 

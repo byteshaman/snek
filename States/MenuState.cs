@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace snek.States {
   public class MenuState : State {
-    private readonly List<Component> components;
+    private readonly List<Button > buttons;
     public MenuState(Game1 game, GraphicsDevice graphicsDevice, ContentManager contentManager, MenuType menu) : base(game, graphicsDevice, contentManager) {
       //Texture2D buttonTexture = contentManager.Load<Texture2D>("Controls/Button");
       SpriteFont buttonFont = contentManager.Load<SpriteFont>("Fonts/Font");
@@ -45,7 +45,7 @@ namespace snek.States {
         game.Exit();
       };
 
-      components = new List<Component>() {
+      buttons = new List<Button >() {
         newGameButton,
         highscoresButton,
         quitGameButton,
@@ -57,15 +57,15 @@ namespace snek.States {
 
       spriteBatch.Begin();
 
-      foreach (Component component in components) { 
-        component.Draw(gameTime, spriteBatch);
+      foreach (Button button in buttons) {
+        button.Draw(gameTime, spriteBatch);
       }
 
       spriteBatch.End();
     }
 
     public override void Update(GameTime gameTime) {
-      foreach (Component component in components) {
+      foreach (Button  component in buttons) {
         component.Update(gameTime);
       }
     }

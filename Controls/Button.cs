@@ -7,7 +7,7 @@ using snek.Helpers;
 
 namespace snek.Controls
 {
-    public class Button : Component {
+    public class Button {
     #region Fields
 
     private MouseState currentMouse;
@@ -46,7 +46,7 @@ namespace snek.Controls
       FontColour = Globals.FONT_COLOR;
     }
 
-    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
+    public void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
       Color buttonColor = Globals.BUTTON_COLOR;
 
       // Change button color when it's hovered
@@ -68,7 +68,7 @@ namespace snek.Controls
       }
     }
 
-    public override void Update(GameTime gameTime) {
+    public void Update(GameTime gameTime) {
       previousMouse = currentMouse;
       currentMouse = Mouse.GetState();
 

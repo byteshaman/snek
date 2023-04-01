@@ -25,8 +25,8 @@ C:\Users\mb_17\source\snek\obj\Debug\net6.0\snek.genruntimeconfig.cache
 C:\Users\mb_17\source\snek\obj\Debug\net6.0\ref\snek.dll
 C:\Users\mb_17\source\snek\bin\Debug\net6.0\MonoGame.Extended.dll
 C:\Users\mb_17\source\snek\bin\Debug\net6.0\Newtonsoft.Json.dll
-C:\Users\mb_17\source\snek\bin\Debug\net6.0\Content\Controls\Button.xnb
 C:\Users\mb_17\source\snek\bin\Debug\net6.0\Content\Fonts\Font.xnb
 C:\Users\mb_17\source\snek\bin\Debug\net6.0\Content\Sprites\food.xnb
 C:\Users\mb_17\source\snek\bin\Debug\net6.0\Content\Sprites\snakeBody.xnb
 C:\Users\mb_17\source\snek\bin\Debug\net6.0\Content\Sprites\snakeHead.xnb
+C:\Users\mb_17\source\snek\bin\Debug\net6.0\Content\Sprites\mouseCursor.xnb

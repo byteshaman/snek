@@ -1,15 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using snek.Base;
 using snek.Helpers;
 using snek.States;
 using System;
-using Food = snek.Base.Food;
 
 namespace snek {
   public class Game1 : Game {
-
     readonly GraphicsDeviceManager graphics;
     SpriteBatch spriteBatch;
     State currentState;
@@ -30,10 +27,16 @@ namespace snek {
     #region BaseFunctions
     // Called after the constructor, used to query any required services and load any non-graphic related content
     protected override void Initialize() {
+      // Load custom cursor
+      Mouse.SetCursor(MouseCursor.FromTexture2D(Content.Load<Texture2D>("Sprites/mouseCursor"),0,0));
+      
       IsMouseVisible = true;
+
+      // Load menu
       currentState = new MenuState(this, graphics.GraphicsDevice, Content, MenuType.GameStart);
 
-      Console.WriteLine($"Width: {graphics.PreferredBackBufferWidth}, Height: {graphics.PreferredBackBufferHeight}");
+      // Debug
+      //Console.WriteLine($"Width: {graphics.PreferredBackBufferWidth}, Height: {graphics.PreferredBackBufferHeight}");
 
       base.Initialize();
     }
@@ -45,8 +48,6 @@ namespace snek {
 
     // Called multiple times per second, draws content to the screen
     protected override void Draw(GameTime gameTime) {
-      //GraphicsDevice.Clear(Globals.MENU_BG_COLOR);
-
       currentState.Draw(gameTime, spriteBatch);
 
       base.Draw(gameTime);
@@ -56,6 +57,7 @@ namespace snek {
     protected override void Update(GameTime gameTime) {
       currentState.Update(gameTime);
 
+      // Detect state change
       if (nextState != null) {
         currentState = nextState;
         nextState = null;

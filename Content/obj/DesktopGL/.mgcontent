@@ -6,10 +6,12 @@
   <SourceFiles>
     <File>C:/Users/mb_17/source/snek/Content/Fonts/Font.spritefont</File>
     <File>C:/Users/mb_17/source/snek/Content/Sprites/food.png</File>
+    <File>C:/Users/mb_17/source/snek/Content/Sprites/mouseCursor.png</File>
     <File>C:/Users/mb_17/source/snek/Content/Sprites/snakeBody.png</File>
     <File>C:/Users/mb_17/source/snek/Content/Sprites/snakeHead.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

@@ -12,7 +12,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Content\fruit.jpg" />
+    <None Remove="Content\mouseCursor.png" />
     <None Remove="Content\snakeHead.jpg" />
+    <None Remove="Content\Sprites\mouseCursor.png" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
   </ItemGroup>
